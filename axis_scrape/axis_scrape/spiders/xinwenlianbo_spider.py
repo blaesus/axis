@@ -143,8 +143,8 @@ def get_period_definitions():
 
 # indexUrls = get_index_urls()
 # Debug
-# indexUrls = get_index_urls(end_date=date(2009, 6, 26))
-indexUrls = get_index_urls(start_date=date(2006, 6, 21), end_date=date(2006, 6, 21))
+indexUrls = get_index_urls(end_date=date(2009, 6, 26))
+# indexUrls = get_index_urls(start_date=date(2006, 6, 21), end_date=date(2006, 6, 21))
 
 
 def getPeriod(target_date, periods):
@@ -165,6 +165,17 @@ def clean_str(s):
         .replace('\n\n', '\n') \
         .replace('\n  ', '\n')\
         .strip()
+
+
+def make_minimal_record(response):
+    return {
+        'url': response.url,
+        'html': response.body,
+        'order': response.meta['order'],
+        'type': 'unexpected',
+        'pub_date': response.meta['pub_date'],
+        'scrape_time_utc': datetime.utcnow(),
+    }
 
 
 class XinwenlianboSpider(scrapy.Spider):
@@ -201,14 +212,7 @@ class XinwenlianboSpider(scrapy.Spider):
         # Handle buggy pages on Xinwenlianbo's side, such as
         # http://news.cctv.com/xwlb/20060621/105163.shtml
         if len(response.body) < 300:
-            return {
-                'url': response.url,
-                'html': response.body,
-                'order': response.meta['order'],
-                'type': 'report-broken',
-                'pub_date': response.meta['pub_date'],
-                'scrape_time_utc': datetime.utcnow(),
-            }
+            return make_minimal_record(response)
 
         title = None
         title_xpaths = [
@@ -222,8 +226,6 @@ class XinwenlianboSpider(scrapy.Spider):
             if xpath_matches:
                 title = clean_str(xpath_matches[0])
                 break
-        if title is None:
-            raise scrapy.exceptions.CloseSpider('Cannot extract title '+response.url)
 
         main_text = None
         main_text_xpaths = [
@@ -238,8 +240,9 @@ class XinwenlianboSpider(scrapy.Spider):
             if xpath_matches:
                 main_text = clean_str('\n'.join(xpath_matches))
                 break
-        if main_text is None:
-            raise scrapy.exceptions.CloseSpider('Cannot extract main text '+response.url)
+
+        if (title is None) or (main_text is None):
+            return make_minimal_record(response)
 
         yield {
             'url': response.url,
