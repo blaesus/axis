@@ -107,6 +107,8 @@ def get_period_definitions():
         },
         {
             'name': 'latest',
+            'start':   date(2016, 2, 7),
+            'end':   date(2046, 6, 30),
             'extract_article_links': extract_article_links_latest
         },
     ]
@@ -117,6 +119,17 @@ indexUrls = getIndexUrls()
 indexUrls = getIndexUrls(date(2016, 2, 5), date.today())
 
 
+def getPeriod(target_date, periods):
+    period = None
+    for period in periods:
+        if period['start'] <= target_date <= period['end']:
+            period = period
+            break
+    if not period:
+        return next(period for period in periods if period['name'] == 'latest')
+    return period
+
+
 class XinwenlianboSpider(scrapy.Spider):
     name = 'xinwenlianbo'
     allowed_domains = ['cntv.cn']
@@ -124,13 +137,9 @@ class XinwenlianboSpider(scrapy.Spider):
     start_urls = indexUrls.keys()
 
     def parse(self, response):
-        periods = get_period_definitions()
         current_date = indexUrls[response.url]
-        current_period = None
-        for period in periods:
-            if period['start'] <= current_date <= period['end']:
-                current_period = period
-                break
+        periods = get_period_definitions()
+        current_period = getPeriod(current_date, periods)
         extract_article_links = current_period['extract_article_links']
         article_links = extract_article_links(response.body)
 
