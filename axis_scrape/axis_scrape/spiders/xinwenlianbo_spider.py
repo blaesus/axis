@@ -156,8 +156,14 @@ def getPeriod(target_date, periods):
         return next(period for period in periods if period['name'] == 'latest')
     return period
 
+
 def clean_str(s):
-    return s.replace('\xa0', ' ').replace('\u3000', ' ').strip()
+    return s.replace('\xa0', ' ')\
+        .replace('\u3000', ' ')\
+        .replace('\r\n', '\n') \
+        .replace('\n\n', '\n') \
+        .replace('\n  ', '\n')\
+        .strip()
 
 
 class XinwenlianboSpider(scrapy.Spider):
@@ -212,7 +218,7 @@ class XinwenlianboSpider(scrapy.Spider):
         for xpath in main_text_xpaths:
             xpath_matches = response.xpath(xpath).extract()
             if xpath_matches:
-                main_text = clean_str(xpath_matches[0])
+                main_text = clean_str('\n'.join(xpath_matches))
         if not main_text:
             raise RuntimeError('Cannot extract main text')
 
