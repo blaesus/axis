@@ -143,7 +143,7 @@ def get_period_definitions():
 
 # indexUrls = get_index_urls()
 # Debug
-indexUrls = get_index_urls(date(2009, 10, 1), date(2009, 10, 1))
+indexUrls = get_index_urls(date(2008, 10, 1), date(2008, 10, 1))
 
 
 def getPeriod(target_date, periods):
@@ -179,10 +179,10 @@ class XinwenlianboSpider(scrapy.Spider):
 
         article_links = extract_article_links(response)
 
-        for article_link in article_links:
+        for index, article_link in enumerate(article_links):
             article_request = scrapy.Request(article_link,
                                              callback=self.parse_single_article)
-            article_request.meta['period'] = current_period
+            article_request.meta['order'] = index
             yield article_request
 
     def parse_single_article(self, response):
@@ -207,5 +207,6 @@ class XinwenlianboSpider(scrapy.Spider):
 
         yield {
             'title': title,
+            'order': response.meta['order'],
             'type': 'report'
         }
