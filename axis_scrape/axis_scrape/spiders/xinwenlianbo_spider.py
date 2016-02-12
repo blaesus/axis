@@ -131,7 +131,7 @@ def get_period_definitions():
         },
         {
             'name': 'latest',
-            'start':   date(2016, 2, 7),
+            'start': date(2016, 2, 7),
             'end':   date(2046, 6, 30),
             'extract_article_links': extract_article_links_latest
         },
