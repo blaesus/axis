@@ -6,10 +6,24 @@ def getIndexUrls(start_date=None, end_date=None):
     :param start_date:
     :param end_date:
     :return: {dict} such as {'http://stuff.com/...': date(2015, 3, 4)}
+
+    Official JavaScript implementation, see source code of
+    http://news.cntv.cn/program/xwlb/20100506.shtml:
+
+    if(time_1<20100506){
+        str = "http://news.cctv.com/program/xwlb/" + year + mon + day + ".shtml";
+    }
+    if(time_1>=20100506&&time_1<20110406){
+        str = "http://news.cntv.cn/program/xwlb/" + year + mon + day + ".shtml";
+    }
+    if(time_1>=20110406){
+        str = "http://cctv.cntv.cn/lm/xinwenlianbo/" + year + mon + day + ".shtml";
+    }
     """
 
     FIRST_AVAILABLE_DATE = date(2009, 6, 27)
-    URL_SCHEMA_CHANGE_DATE = date(2011, 4, 6)
+    URL_SCHEMA_CHANGE_DATE_A = date(2010, 5, 6)
+    URL_SCHEMA_CHANGE_DATE_B = date(2011, 4, 6)
 
     if not start_date:
         start_date = FIRST_AVAILABLE_DATE
@@ -20,8 +34,11 @@ def getIndexUrls(start_date=None, end_date=None):
     today = start_date
     while today < end_date:
         date_numerals = str(today).replace('-', '')
-        if today < URL_SCHEMA_CHANGE_DATE:
+        if today < URL_SCHEMA_CHANGE_DATE_A:
             index_url = 'http://news.cctv.com/program/xwlb/' + \
+                        date_numerals + '.shtml'
+        elif today < URL_SCHEMA_CHANGE_DATE_B:
+            index_url = 'http://news.cntv.cn/program/xwlb/' + \
                         date_numerals + '.shtml'
         else:
             index_url = 'http://cctv.cntv.cn/lm/xinwenlianbo/' + \
@@ -95,6 +112,8 @@ def get_period_definitions():
     ]
     return periods
 
+indexUrls = getIndexUrls()
+# Debug
 indexUrls = getIndexUrls(date(2016, 2, 5), date.today())
 
 
@@ -102,7 +121,6 @@ class XinwenlianboSpider(scrapy.Spider):
     name = 'xinwenlianbo'
     allowed_domains = ['cntv.cn']
 
-    # Debug
     start_urls = indexUrls.keys()
 
     def parse(self, response):
