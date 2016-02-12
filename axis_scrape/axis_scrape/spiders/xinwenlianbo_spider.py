@@ -68,20 +68,22 @@ def get_index_urls(start_date=None, end_date=None):
 def extract_article_links_a(response):
     return []
 
+def extract_article_links_b(response):
+    return []
 
-def extract_article_links_b1(response):
+def extract_article_links_c1(response):
     return []
 
 
-def extract_article_links_b2(response):
+def extract_article_links_c2(response):
     return []
 
 
-def extract_article_links_b3(response):
+def extract_article_links_c3(response):
     return []
 
 
-def extract_article_links_b4(response):
+def extract_article_links_c4(response):
     return []
 
 
@@ -93,33 +95,39 @@ def get_period_definitions():
     periods = [
         {
             'name': 'period-a',
-            'start': date(2009, 6, 27),
-            'end':   date(2011, 4, 5),
+            'start': date(2002, 9, 8),
+            'end':   date(2009, 6, 26),
             'extract_article_links': extract_article_links_a
         },
         {
-            'name': 'period-b1',
+            'name': 'period-b',
+            'start': date(2009, 6, 27),
+            'end':   date(2011, 4, 5),
+            'extract_article_links': extract_article_links_b
+        },
+        {
+            'name': 'period-c1',
             'start': date(2011, 4, 6),
             'end':   date(2012, 2, 27),
-            'extract_article_links': extract_article_links_b1
+            'extract_article_links': extract_article_links_c1
         },
         {
-            'name': 'period-b2',
+            'name': 'period-c2',
             'start': date(2012, 2, 28),
             'end':   date(2012, 3, 29),
-            'extract_article_links': extract_article_links_b2
+            'extract_article_links': extract_article_links_c2
         },
         {
-            'name': 'period-b3',
+            'name': 'period-c3',
             'start': date(2012, 3, 30),
             'end':   date(2013, 7, 14),
-            'extract_article_links': extract_article_links_b3
+            'extract_article_links': extract_article_links_c3
         },
         {
-            'name': 'period-b4',
+            'name': 'period-c4',
             'start': date(2013, 7, 15),
             'end':   date(2016, 2, 6),  # Last date of confirmed use
-            'extract_article_links': extract_article_links_b4
+            'extract_article_links': extract_article_links_c4
         },
         {
             'name': 'latest',
