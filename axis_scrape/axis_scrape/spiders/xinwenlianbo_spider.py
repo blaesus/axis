@@ -143,7 +143,7 @@ def get_period_definitions():
 
 # indexUrls = get_index_urls()
 # Debug
-indexUrls = get_index_urls(date(2002, 10, 1), date(2002, 10, 1))
+indexUrls = get_index_urls(date(2009, 10, 1), date(2009, 10, 1))
 
 
 def getPeriod(target_date, periods):
@@ -155,6 +155,9 @@ def getPeriod(target_date, periods):
     if not period:
         return next(period for period in periods if period['name'] == 'latest')
     return period
+
+def clean_str(s):
+    return s.replace('\xa0', ' ').replace('\u3000', ' ').strip()
 
 
 class XinwenlianboSpider(scrapy.Spider):
@@ -169,7 +172,9 @@ class XinwenlianboSpider(scrapy.Spider):
         extract_article_links = current_period['extract_article_links']
 
         yield {
-            'title': ''
+            'title': '',
+            'type': 'index',
+            'date': current_date
         }
 
         article_links = extract_article_links(response)
@@ -186,14 +191,21 @@ class XinwenlianboSpider(scrapy.Spider):
         # title
         # =====
 
-        title = response.xpath(
-                '//*[@align="center"]/p/font[@class="fs24"]/text()'
-        ).extract()[0].strip()
-
+        title_xpaths = [
+            '//*[@align="center"]/p/font[@class="fs24"]/text()',
+            '//p/font[@class="title_text"]/text()',
+            '//div[@align="center"]/span[@class="title"]/text()',
+            '//div[@class="head_bar"]/h1/text()',
+        ]
+        title = None
+        for xpath in title_xpaths:
+            xpath_matches = response.xpath(xpath).extract()
+            if xpath_matches:
+                title = clean_str(xpath_matches[0])
         if not title:
-            pass
-
+            raise RuntimeError('Cannot extract title')
 
         yield {
-            'title': title
+            'title': title,
+            'type': 'report'
         }
