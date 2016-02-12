@@ -174,7 +174,8 @@ class XinwenlianboSpider(scrapy.Spider):
         yield {
             'title': '',
             'type': 'index',
-            'date': current_date
+            'pub_date': current_date,
+            'scrape_date': date.today(),
         }
 
         article_links = extract_article_links(response)
@@ -183,6 +184,7 @@ class XinwenlianboSpider(scrapy.Spider):
             article_request = scrapy.Request(article_link,
                                              callback=self.parse_single_article)
             article_request.meta['order'] = index
+            article_request.meta['pub_date'] = current_date
             yield article_request
 
     def parse_single_article(self, response):
@@ -208,5 +210,7 @@ class XinwenlianboSpider(scrapy.Spider):
         yield {
             'title': title,
             'order': response.meta['order'],
-            'type': 'report'
+            'type': 'report',
+            'pub_date': response.meta['pub_date'],
+            'scrape_date': date.today()
         }
