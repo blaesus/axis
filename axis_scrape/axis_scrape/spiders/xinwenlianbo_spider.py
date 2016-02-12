@@ -52,7 +52,7 @@ def get_index_urls(start_date=None, end_date=None):
     index_urls = {}
 
     today = start_date
-    while today < end_date:
+    while today <= end_date:
         date_numerals = str(today).replace('-', '')
 
         index_url = None
@@ -68,7 +68,8 @@ def get_index_urls(start_date=None, end_date=None):
 
 def extract_article_links_a(response):
     return [urljoin(response.url, path)
-            for path in response.xpath('//a[@class="color4"]/@href').extract()]
+            for path in response.xpath('//a[@class="color4"]/@href').extract()
+            if path]
 
 def extract_article_links_b(response):
     return []
@@ -142,7 +143,7 @@ def get_period_definitions():
 
 # indexUrls = get_index_urls()
 # Debug
-indexUrls = get_index_urls(date(2005, 5, 1), date(2005, 5, 10))
+indexUrls = get_index_urls(date(2005, 5, 1), date(2005, 5, 1))
 
 
 def getPeriod(target_date, periods):
@@ -166,6 +167,11 @@ class XinwenlianboSpider(scrapy.Spider):
         periods = get_period_definitions()
         current_period = getPeriod(current_date, periods)
         extract_article_links = current_period['extract_article_links']
+
+        yield {
+            'title': ''
+        }
+
         article_links = extract_article_links(response)
 
         for article_link in article_links:
