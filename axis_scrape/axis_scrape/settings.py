@@ -14,7 +14,14 @@ BOT_NAME = 'axis_scrape'
 SPIDER_MODULES = ['axis_scrape.spiders']
 NEWSPIDER_MODULE = 'axis_scrape.spiders'
 
-
+DATABASE = {
+   'drivername': 'postgres',
+   'host': 'localhost',
+   'port': '5432',
+   'username': 'scrapy',
+   'password': 'scrapy',
+   'database': 'xinwenlianbo'
+}
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 #USER_AGENT = 'axis_scrape (+http://www.yourdomain.com)'
 
@@ -61,9 +68,9 @@ NEWSPIDER_MODULE = 'axis_scrape.spiders'
 
 # Configure item pipelines
 # See http://scrapy.readthedocs.org/en/latest/topics/item-pipeline.html
-#ITEM_PIPELINES = {
-#    'axis_scrape.pipelines.SomePipeline': 300,
-#}
+ITEM_PIPELINES = {
+   'axis_scrape.pipelines.XinwenlianboScrapePipeline': 300,
+}
 
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See http://doc.scrapy.org/en/latest/topics/autothrottle.html
