@@ -189,17 +189,13 @@ class XinwenlianboSpider(scrapy.Spider):
 
     def parse_single_article(self, response):
 
-        # =====
-        # title
-        # =====
-
+        title = None
         title_xpaths = [
             '//*[@align="center"]/p/font[@class="fs24"]/text()',
             '//p/font[@class="title_text"]/text()',
             '//div[@align="center"]/span[@class="title"]/text()',
             '//div[@class="head_bar"]/h1/text()',
         ]
-        title = None
         for xpath in title_xpaths:
             xpath_matches = response.xpath(xpath).extract()
             if xpath_matches:
@@ -207,10 +203,25 @@ class XinwenlianboSpider(scrapy.Spider):
         if not title:
             raise RuntimeError('Cannot extract title')
 
+        main_text = ''
+        main_text_xpaths = [
+            '//td[@width="608" and @colspan="3"]/text()',
+            '//div[@id="content"]/p/text()',
+            '//div[@id="md_major_article_content"]/p/text()'
+        ]
+        for xpath in main_text_xpaths:
+            xpath_matches = response.xpath(xpath).extract()
+            if xpath_matches:
+                main_text = clean_str(xpath_matches[0])
+        if not main_text:
+            raise RuntimeError('Cannot extract main text')
+
+
         yield {
             'title': title,
             'order': response.meta['order'],
             'type': 'report',
             'pub_date': response.meta['pub_date'],
-            'scrape_date': date.today()
+            'scrape_date': date.today(),
+            'main_text': main_text
         }
