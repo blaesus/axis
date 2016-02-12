@@ -143,7 +143,8 @@ def get_period_definitions():
 
 # indexUrls = get_index_urls()
 # Debug
-indexUrls = get_index_urls(date(2002, 9, 30), date(2002, 9, 30))
+# indexUrls = get_index_urls(end_date=date(2009, 6, 26))
+indexUrls = get_index_urls(start_date=date(2006, 6, 21), end_date=date(2006, 6, 21))
 
 
 def getPeriod(target_date, periods):
@@ -196,6 +197,18 @@ class XinwenlianboSpider(scrapy.Spider):
             yield article_request
 
     def parse_single_article(self, response):
+
+        # Handle buggy pages on Xinwenlianbo's side, such as
+        # http://news.cctv.com/xwlb/20060621/105163.shtml
+        if len(response.body) < 300:
+            return {
+                'url': response.url,
+                'html': response.body,
+                'order': response.meta['order'],
+                'type': 'report-broken',
+                'pub_date': response.meta['pub_date'],
+                'scrape_time_utc': datetime.utcnow(),
+            }
 
         title = None
         title_xpaths = [
