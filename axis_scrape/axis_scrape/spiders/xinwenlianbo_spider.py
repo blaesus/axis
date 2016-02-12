@@ -156,7 +156,6 @@ def getPeriod(target_date, periods):
 
 class XinwenlianboSpider(scrapy.Spider):
     name = 'xinwenlianbo'
-    allowed_domains = ['cntv.cn']
 
     start_urls = indexUrls.keys()
 
