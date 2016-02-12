@@ -27,7 +27,7 @@ def get_url_schemes():
     return (
         (date(2002, 9, 8), lambda s:
             'http://www.cctv.com/news/xwlb/' + s + '/index.shtml'),
-        (date(2009, 6, 27), lambda s:
+        (date(2009, 6, 26), lambda s:
             'http://news.cctv.com/program/xwlb/' + s + '.shtml'),
         (date(2010, 5, 6), lambda s:
             'http://news.cntv.cn/program/xwlb/' + s + '.shtml'),
@@ -143,7 +143,7 @@ def get_period_definitions():
 
 # indexUrls = get_index_urls()
 # Debug
-indexUrls = get_index_urls(date(2005, 5, 1), date(2005, 5, 1))
+indexUrls = get_index_urls(date(2002, 10, 1), date(2002, 10, 1))
 
 
 def getPeriod(target_date, periods):
@@ -176,11 +176,24 @@ class XinwenlianboSpider(scrapy.Spider):
 
         for article_link in article_links:
             article_request = scrapy.Request(article_link,
-                                             callback=self.parse_single_report)
+                                             callback=self.parse_single_article)
             article_request.meta['period'] = current_period
             yield article_request
 
-    def parse_single_report(self, response):
+    def parse_single_article(self, response):
+
+        # =====
+        # title
+        # =====
+
+        title = response.xpath(
+                '//*[@align="center"]/p/font[@class="fs24"]/text()'
+        ).extract()[0].strip()
+
+        if not title:
+            pass
+
+
         yield {
-            'title': ''
+            'title': title
         }
