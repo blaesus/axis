@@ -167,12 +167,12 @@ def clean_str(s):
         .strip()
 
 
-def make_minimal_record(response):
+def make_minimal_record(response, response_type='unexpected'):
     return {
         'url': response.url,
         'html': response.body,
         'order': response.meta['order'],
-        'type': 'unexpected',
+        'type': response_type,
         'pub_date': response.meta['pub_date'],
         'scrape_time_utc': datetime.utcnow(),
     }
@@ -189,14 +189,7 @@ class XinwenlianboSpider(scrapy.Spider):
         current_period = getPeriod(current_date, periods)
         extract_article_links = current_period['extract_article_links']
 
-        yield {
-            'url': response.url,
-            'html': response.body,
-            'title': '',
-            'type': 'index',
-            'pub_date': current_date,
-            'scrape_time_utc': datetime.utcnow(),
-        }
+        yield make_minimal_record(response, 'index')
 
         article_links = extract_article_links(response)
 
@@ -212,45 +205,45 @@ class XinwenlianboSpider(scrapy.Spider):
         # Handle buggy pages on Xinwenlianbo's side, such as
         # http://news.cctv.com/xwlb/20060621/105163.shtml
         if len(response.body) < 300:
-            return make_minimal_record(response)
+            yield make_minimal_record(response)
+        else:
+            title = None
+            title_xpaths = [
+                '//*[@align="center"]/p/font[@class="fs24"]/text()',
+                '//p/font[@class="title_text"]/text()',
+                '//*[@align="center"]/span[@class="title"]/text()',
+                '//div[@class="head_bar"]/h1/text()',
+            ]
+            for xpath in title_xpaths:
+                xpath_matches = response.xpath(xpath).extract()
+                if xpath_matches:
+                    title = clean_str(xpath_matches[0])
+                    break
 
-        title = None
-        title_xpaths = [
-            '//*[@align="center"]/p/font[@class="fs24"]/text()',
-            '//p/font[@class="title_text"]/text()',
-            '//*[@align="center"]/span[@class="title"]/text()',
-            '//div[@class="head_bar"]/h1/text()',
-        ]
-        for xpath in title_xpaths:
-            xpath_matches = response.xpath(xpath).extract()
-            if xpath_matches:
-                title = clean_str(xpath_matches[0])
-                break
+            main_text = None
+            main_text_xpaths = [
+                '//td[@width="608" and @colspan="3"]/text()',
+                '//div[@id="content"]/p/text()',
+                '//*[@align="center"]/p/text()',
+                '//div[@id="md_major_article_content"]/p/text()',
+                '//td[@class="large"]/p/text()',
+            ]
+            for xpath in main_text_xpaths:
+                xpath_matches = response.xpath(xpath).extract()
+                if xpath_matches:
+                    main_text = clean_str('\n'.join(xpath_matches))
+                    break
 
-        main_text = None
-        main_text_xpaths = [
-            '//td[@width="608" and @colspan="3"]/text()',
-            '//div[@id="content"]/p/text()',
-            '//*[@align="center"]/p/text()',
-            '//div[@id="md_major_article_content"]/p/text()',
-            '//td[@class="large"]/p/text()',
-        ]
-        for xpath in main_text_xpaths:
-            xpath_matches = response.xpath(xpath).extract()
-            if xpath_matches:
-                main_text = clean_str('\n'.join(xpath_matches))
-                break
-
-        if (title is None) or (main_text is None):
-            return make_minimal_record(response)
-
-        yield {
-            'url': response.url,
-            'html': response.body,
-            'title': title,
-            'order': response.meta['order'],
-            'type': 'report',
-            'pub_date': response.meta['pub_date'],
-            'scrape_time_utc': datetime.utcnow(),
-            'main_text': main_text
-        }
+            if (title is None) or (main_text is None):
+                yield make_minimal_record(response)
+            else:
+                yield {
+                    'url': response.url,
+                    'html': response.body,
+                    'title': title,
+                    'order': response.meta['order'],
+                    'type': 'report',
+                    'pub_date': response.meta['pub_date'],
+                    'scrape_time_utc': datetime.utcnow(),
+                    'main_text': main_text
+                }
