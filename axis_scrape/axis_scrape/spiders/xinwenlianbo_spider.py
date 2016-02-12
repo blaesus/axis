@@ -143,7 +143,7 @@ def get_period_definitions():
 
 # indexUrls = get_index_urls()
 # Debug
-indexUrls = get_index_urls(date(2008, 10, 1), date(2008, 10, 1))
+indexUrls = get_index_urls(date(2005, 6, 1), date(2005, 6, 1))
 
 
 def getPeriod(target_date, periods):
@@ -216,7 +216,8 @@ class XinwenlianboSpider(scrapy.Spider):
             '//td[@width="608" and @colspan="3"]/text()',
             '//div[@id="content"]/p/text()',
             '//div[@align="center"]/p/text()',
-            '//div[@id="md_major_article_content"]/p/text()'
+            '//div[@id="md_major_article_content"]/p/text()',
+            '//td[@class="large"]/p/text()',
         ]
         for xpath in main_text_xpaths:
             xpath_matches = response.xpath(xpath).extract()
