@@ -199,7 +199,7 @@ class XinwenlianboSpider(scrapy.Spider):
         title_xpaths = [
             '//*[@align="center"]/p/font[@class="fs24"]/text()',
             '//p/font[@class="title_text"]/text()',
-            '//div[@align="center"]/span[@class="title"]/text()',
+            '//*[@align="center"]/span[@class="title"]/text()',
             '//div[@class="head_bar"]/h1/text()',
         ]
         for xpath in title_xpaths:
@@ -213,6 +213,7 @@ class XinwenlianboSpider(scrapy.Spider):
         main_text_xpaths = [
             '//td[@width="608" and @colspan="3"]/text()',
             '//div[@id="content"]/p/text()',
+            '//div[@align="center"]/p/text()',
             '//div[@id="md_major_article_content"]/p/text()'
         ]
         for xpath in main_text_xpaths:
@@ -221,7 +222,6 @@ class XinwenlianboSpider(scrapy.Spider):
                 main_text = clean_str('\n'.join(xpath_matches))
         if not main_text:
             raise RuntimeError('Cannot extract main text')
-
 
         yield {
             'title': title,
