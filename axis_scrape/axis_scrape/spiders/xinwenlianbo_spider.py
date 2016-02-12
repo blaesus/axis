@@ -1,4 +1,5 @@
 import scrapy
+from urllib.parse import urljoin
 from datetime import date, timedelta
 
 # Naming indices for use in combination with url_schemes
@@ -66,7 +67,8 @@ def get_index_urls(start_date=None, end_date=None):
 
 
 def extract_article_links_a(response):
-    return []
+    return [urljoin(response.url, path)
+            for path in response.xpath('//a[@class="color4"]/@href').extract()]
 
 def extract_article_links_b(response):
     return []
@@ -140,7 +142,7 @@ def get_period_definitions():
 
 # indexUrls = get_index_urls()
 # Debug
-indexUrls = get_index_urls(date(2010, 5, 1), date(2010, 5, 10))
+indexUrls = get_index_urls(date(2005, 5, 1), date(2005, 5, 10))
 
 
 def getPeriod(target_date, periods):
@@ -164,7 +166,7 @@ class XinwenlianboSpider(scrapy.Spider):
         periods = get_period_definitions()
         current_period = getPeriod(current_date, periods)
         extract_article_links = current_period['extract_article_links']
-        article_links = extract_article_links(response.body)
+        article_links = extract_article_links(response)
 
         for article_link in article_links:
             article_request = scrapy.Request(article_link,
