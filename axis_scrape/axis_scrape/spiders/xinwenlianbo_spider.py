@@ -1,6 +1,6 @@
 import scrapy
 from urllib.parse import urljoin
-from datetime import date, timedelta
+from datetime import datetime, date, timedelta
 
 # Naming indices for use in combination with url_schemes
 DATE = 0
@@ -178,10 +178,12 @@ class XinwenlianboSpider(scrapy.Spider):
         extract_article_links = current_period['extract_article_links']
 
         yield {
+            'url': response.url,
+            'html': response.body,
             'title': '',
             'type': 'index',
             'pub_date': current_date,
-            'scrape_date': date.today(),
+            'scrape_time_utc': datetime.utcnow(),
         }
 
         article_links = extract_article_links(response)
@@ -224,10 +226,12 @@ class XinwenlianboSpider(scrapy.Spider):
             raise RuntimeError('Cannot extract main text')
 
         yield {
+            'url': response.url,
+            'html': response.body,
             'title': title,
             'order': response.meta['order'],
             'type': 'report',
             'pub_date': response.meta['pub_date'],
-            'scrape_date': date.today(),
+            'scrape_time_utc': datetime.utcnow(),
             'main_text': main_text
         }
