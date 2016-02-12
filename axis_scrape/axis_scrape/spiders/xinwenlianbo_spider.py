@@ -143,7 +143,7 @@ def get_period_definitions():
 
 # indexUrls = get_index_urls()
 # Debug
-indexUrls = get_index_urls(date(2005, 6, 1), date(2005, 6, 1))
+indexUrls = get_index_urls(date(2002, 9, 30), date(2002, 9, 30))
 
 
 def getPeriod(target_date, periods):
@@ -208,14 +208,15 @@ class XinwenlianboSpider(scrapy.Spider):
             xpath_matches = response.xpath(xpath).extract()
             if xpath_matches:
                 title = clean_str(xpath_matches[0])
-        if not title:
-            raise RuntimeError('Cannot extract title')
+                break
+        if title is None:
+            raise scrapy.exceptions.CloseSpider('Cannot extract title '+response.url)
 
-        main_text = ''
+        main_text = None
         main_text_xpaths = [
             '//td[@width="608" and @colspan="3"]/text()',
             '//div[@id="content"]/p/text()',
-            '//div[@align="center"]/p/text()',
+            '//*[@align="center"]/p/text()',
             '//div[@id="md_major_article_content"]/p/text()',
             '//td[@class="large"]/p/text()',
         ]
@@ -223,8 +224,9 @@ class XinwenlianboSpider(scrapy.Spider):
             xpath_matches = response.xpath(xpath).extract()
             if xpath_matches:
                 main_text = clean_str('\n'.join(xpath_matches))
-        if not main_text:
-            raise RuntimeError('Cannot extract main text')
+                break
+        if main_text is None:
+            raise scrapy.exceptions.CloseSpider('Cannot extract main text '+response.url)
 
         yield {
             'url': response.url,
