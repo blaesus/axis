@@ -31,7 +31,8 @@ def get_url_schemes():
 
 def get_index_urls(start_date=None, end_date=None):
     """
-    Get a list of urls to candidate index pages and the publication date
+    Get a list of urls to candidate index pages and the publication date.
+    The list is not ordered by date.
     :param start_date:
     :param end_date:
     :return: {dict} such as {'http://stuff.com/...': date(2015, 3, 4)}
