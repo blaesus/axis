@@ -9,18 +9,11 @@ URL_FUNCTION = 1
 
 def get_url_schemes():
     """
-    See official JavaScript implementation, such as source code of
-    http://news.cntv.cn/program/xwlb/20100506.shtml:
+    Get the a tuple representing relationship between dates and urls of index pages.
+    :return: {tuple}
 
-    if(time_1<20100506){
-    str = "http://news.cctv.com/program/xwlb/" + year + mon + day + ".shtml";
-    }
-    if(time_1>=20100506&&time_1<20110406){
-    str = "http://news.cntv.cn/program/xwlb/" + year + mon + day + ".shtml";
-    }
-    if(time_1>=20110406){
-    str = "http://cctv.cntv.cn/lm/xinwenlianbo/" + year + mon + day + ".shtml";
-    }
+    See official JavaScript implementation, such as source code of
+    http://news.cntv.cn/program/xwlb/20100506.shtml
     """
 
     # [(Start-date, URL function)]
@@ -38,6 +31,7 @@ def get_url_schemes():
 
 def get_index_urls(start_date=None, end_date=None):
     """
+    Get a list of urls to candidate index pages and the publication date
     :param start_date:
     :param end_date:
     :return: {dict} such as {'http://stuff.com/...': date(2015, 3, 4)}
@@ -147,7 +141,7 @@ indexUrls = get_index_urls(end_date=date(2009, 6, 26))
 # indexUrls = get_index_urls(start_date=date(2006, 6, 21), end_date=date(2006, 6, 21))
 
 
-def getPeriod(target_date, periods):
+def get_period(target_date, periods):
     period = None
     for period in periods:
         if period['start'] <= target_date <= period['end']:
@@ -186,7 +180,7 @@ class XinwenlianboSpider(scrapy.Spider):
     def parse(self, response):
         current_date = indexUrls[response.url]
         periods = get_period_definitions()
-        current_period = getPeriod(current_date, periods)
+        current_period = get_period(current_date, periods)
         extract_article_links = current_period['extract_article_links']
 
         yield make_minimal_record(response, 'index')
@@ -201,6 +195,11 @@ class XinwenlianboSpider(scrapy.Spider):
             yield article_request
 
     def parse_single_article(self, response):
+        """
+        Gather information about one report in a day
+        :param response:
+        :return: {dict}
+        """
 
         # Handle buggy pages on Xinwenlianbo's side, such as
         # http://news.cctv.com/xwlb/20060621/105163.shtml
