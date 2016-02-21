@@ -66,27 +66,33 @@ def extract_article_links_a(response):
             for path in response.xpath('//a[@class="color4"]/@href').extract()
             if path]
 
+
 def extract_article_links_b(response):
-    return []
-
-def extract_article_links_c1(response):
-    return []
+    return response.xpath('//ul[@class="title_list tl_f14 tl_video"]//a[@target="_blank"]/@href').extract()
 
 
-def extract_article_links_c2(response):
-    return []
+def extract_article_links_c(response):
+    return extract_article_links_b(response)
 
 
-def extract_article_links_c3(response):
-    return []
+def extract_article_links_d1(response):
+    return response.xpath('//script/text()').re("title_array_01.*,'(.*?)'")
 
 
-def extract_article_links_c4(response):
-    return []
+def extract_article_links_d2(response):
+    return extract_article_links_d1(response)
+
+
+def extract_article_links_d3(response):
+    return extract_article_links_d1(response)
+
+
+def extract_article_links_d4(response):
+    return response.xpath('//ul[contains(@class, "fs_14")]/li/a/@href').extract()
 
 
 def extract_article_links_latest(response):
-    return []
+    return extract_article_links_d4(response)
 
 
 def get_period_definitions():
@@ -94,38 +100,44 @@ def get_period_definitions():
         {
             'name': 'period-a',
             'start': date(2002, 9, 8),
-            'end':   date(2009, 6, 26),
+            'end':   date(2009, 6, 25),
             'extract_article_links': extract_article_links_a
         },
         {
             'name': 'period-b',
-            'start': date(2009, 6, 27),
-            'end':   date(2011, 4, 5),
+            'start': date(2009, 6, 26),
+            'end':   date(2010, 5, 5),
             'extract_article_links': extract_article_links_b
         },
         {
-            'name': 'period-c1',
+            'name': 'period-c',
+            'start': date(2010, 5, 6),
+            'end':   date(2011, 4, 5),
+            'extract_article_links': extract_article_links_c
+        },
+        {
+            'name': 'period-d1',
             'start': date(2011, 4, 6),
-            'end':   date(2012, 2, 27),
-            'extract_article_links': extract_article_links_c1
+            'end':   date(2012, 2, 26),
+            'extract_article_links': extract_article_links_d1
         },
         {
             'name': 'period-c2',
-            'start': date(2012, 2, 28),
-            'end':   date(2012, 3, 29),
-            'extract_article_links': extract_article_links_c2
+            'start': date(2012, 2, 27),
+            'end':   date(2012, 3, 28),
+            'extract_article_links': extract_article_links_d2
         },
         {
             'name': 'period-c3',
             'start': date(2012, 3, 30),
             'end':   date(2013, 7, 14),
-            'extract_article_links': extract_article_links_c3
+            'extract_article_links': extract_article_links_d3
         },
         {
             'name': 'period-c4',
             'start': date(2013, 7, 15),
             'end':   date(2016, 2, 6),  # Last date of confirmed use
-            'extract_article_links': extract_article_links_c4
+            'extract_article_links': extract_article_links_d4
         },
         {
             'name': 'latest',
@@ -138,8 +150,8 @@ def get_period_definitions():
 
 # indexUrls = get_index_urls()
 # Debug
-indexUrls = get_index_urls(end_date=date(2009, 6, 26))
-# indexUrls = get_index_urls(start_date=date(2006, 6, 21), end_date=date(2006, 6, 21))
+# indexUrls = get_index_urls(end_date=date(2009, 6, 26))
+indexUrls = get_index_urls(start_date=date(2013, 1, 1), end_date=date(2013, 1, 2))
 
 
 def get_period(target_date, periods):
@@ -183,6 +195,8 @@ class XinwenlianboSpider(scrapy.Spider):
         periods = get_period_definitions()
         current_period = get_period(current_date, periods)
         extract_article_links = current_period['extract_article_links']
+        response.meta['order'] = None
+        response.meta['pub_date'] = current_date
 
         yield make_minimal_record(response, 'index')
 
@@ -213,20 +227,25 @@ class XinwenlianboSpider(scrapy.Spider):
                 '//p/font[@class="title_text"]/text()',
                 '//*[@align="center"]/span[@class="title"]/text()',
                 '//div[@class="head_bar"]/h1/text()',
+                '//div[@class="title padd"]/h1/text()',
+                '//div[@class="top_title"]/h1[@class="b-tit"]/text()'
             ]
             for xpath in title_xpaths:
                 xpath_matches = response.xpath(xpath).extract()
                 if xpath_matches:
-                    title = clean_str(xpath_matches[0])
+                    title = clean_str(''.join(xpath_matches))
                     break
 
             main_text = None
             main_text_xpaths = [
                 '//td[@width="608" and @colspan="3"]/text()',
-                '//div[@id="content"]/p/text()',
-                '//*[@align="center"]/p/text()',
-                '//div[@id="md_major_article_content"]/p/text()',
-                '//td[@class="large"]/p/text()',
+                '//div[@id="content"]//*[self::p or self::span]/text()',
+                '//*[@align="center"]//*[self::p or self::span]/text()',
+                '//div[@id="md_major_article_content"]//*[self::p or self::span]/text()',
+                '//td[@class="large"]//*[self::p or self::span]/text()',
+                '//div[@class="text_box"]//*[self::p or self::span]/text()',
+                '//div[@id="content_body"]//*[self::p or self::span]/text()',
+                '//div[@id="top_title"]/p[@class="art-info"]/text()'
             ]
             for xpath in main_text_xpaths:
                 xpath_matches = response.xpath(xpath).extract()
