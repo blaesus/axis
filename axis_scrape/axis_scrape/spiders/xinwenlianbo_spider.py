@@ -196,7 +196,6 @@ class XinwenlianboSpider(scrapy.Spider):
             start_date = datetime.strptime(start, date_format).date()
         if end:
             end_date = datetime.strptime(end, date_format).date()
-        logging.debug([start, end, start_date, end_date])
 
         self.start_urls = self.indexUrls.keys()
 
