@@ -148,10 +148,6 @@ def get_period_definitions():
     ]
     return periods
 
-# indexUrls = get_index_urls()
-# Debug
-# indexUrls = get_index_urls(end_date=date(2009, 6, 26))
-indexUrls = get_index_urls(start_date=date(2012, 4, 6), end_date=date(2012, 4, 6))
 
 
 def get_period(target_date, periods):
@@ -186,13 +182,28 @@ def make_minimal_record(response, response_type='unexpected'):
 
 
 class XinwenlianboSpider(scrapy.Spider):
+
     name = 'xinwenlianbo'
 
-    start_urls = indexUrls.keys()
-    handle_httpstatus_list = [404]
+    def __init__(self, start=None, end=None, *args, **kwargs):
+        super(XinwenlianboSpider, self).__init__(*args, **kwargs)
+
+        date_format = '%Y%m%d'
+        start_date = date.today()
+        end_date = date.today()
+
+        if start:
+            start_date = datetime.strptime(start, date_format).date()
+        if end:
+            end_date = datetime.strptime(end, date_format).date()
+        logging.debug([start, end, start_date, end_date])
+
+        self.start_urls = self.indexUrls.keys()
+
+        self.handle_httpstatus_list = [404]
 
     def parse(self, response):
-        current_date = indexUrls[response.url]
+        current_date = self.indexUrls[response.url]
         periods = get_period_definitions()
         current_period = get_period(current_date, periods)
         extract_article_links = current_period['extract_article_links']
