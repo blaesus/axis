@@ -151,7 +151,7 @@ def get_period_definitions():
 # indexUrls = get_index_urls()
 # Debug
 # indexUrls = get_index_urls(end_date=date(2009, 6, 26))
-indexUrls = get_index_urls(start_date=date(2013, 1, 1), end_date=date(2013, 1, 2))
+indexUrls = get_index_urls(start_date=date(2012, 4, 6), end_date=date(2012, 4, 6))
 
 
 def get_period(target_date, periods):
@@ -189,6 +189,7 @@ class XinwenlianboSpider(scrapy.Spider):
     name = 'xinwenlianbo'
 
     start_urls = indexUrls.keys()
+    handle_httpstatus_list = [404]
 
     def parse(self, response):
         current_date = indexUrls[response.url]
@@ -215,6 +216,10 @@ class XinwenlianboSpider(scrapy.Spider):
         :param response:
         :return: {dict}
         """
+
+        # Handle 404
+        if response.status == 404:
+            yield make_minimal_record(response, response_type='missing')
 
         # Handle buggy pages on Xinwenlianbo's side, such as
         # http://news.cctv.com/xwlb/20060621/105163.shtml
