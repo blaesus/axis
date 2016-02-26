@@ -122,19 +122,19 @@ def get_period_definitions():
             'extract_article_links': extract_article_links_d1
         },
         {
-            'name': 'period-c2',
+            'name': 'period-d2',
             'start': date(2012, 2, 27),
             'end':   date(2012, 3, 28),
             'extract_article_links': extract_article_links_d2
         },
         {
-            'name': 'period-c3',
+            'name': 'period-d3',
             'start': date(2012, 3, 30),
             'end':   date(2013, 7, 14),
             'extract_article_links': extract_article_links_d3
         },
         {
-            'name': 'period-c4',
+            'name': 'period-d4',
             'start': date(2013, 7, 15),
             'end':   date(2016, 2, 6),  # Last date of confirmed use
             'extract_article_links': extract_article_links_d4
