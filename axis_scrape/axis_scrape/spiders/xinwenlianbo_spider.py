@@ -26,6 +26,8 @@ def get_url_schemes():
             'http://news.cntv.cn/program/xwlb/' + s + '.shtml'),
         (date(2011, 4, 6), lambda s:
             'http://cctv.cntv.cn/lm/xinwenlianbo/' + s + '.shtml'),
+        (date(2016, 2, 21), lambda s:
+            'http://tv.cctv.com/lm/xwlb/day/' + s + '.shtml'),
     )
 
 
@@ -91,8 +93,12 @@ def extract_article_links_d4(response):
     return response.xpath('//ul[contains(@class, "fs_14")]/li/a/@href').extract()
 
 
+def extract_article_links_e(response):
+    return response.xpath('//li/a/@href').extract()
+
+
 def extract_article_links_latest(response):
-    return extract_article_links_d4(response)
+    return extract_article_links_e(response)
 
 
 def get_period_definitions():
@@ -136,12 +142,18 @@ def get_period_definitions():
         {
             'name': 'period-d4',
             'start': date(2013, 7, 15),
-            'end':   date(2016, 2, 6),  # Last date of confirmed use
+            'end':   date(2016, 2, 20),
             'extract_article_links': extract_article_links_d4
         },
         {
+            'name': 'period-e',
+            'start': date(2016, 2, 21),
+            'end':   date(2016, 2, 26),  # Latest confirmed date
+            'extract_article_links': extract_article_links_e
+        },
+        {
             'name': 'latest',
-            'start': date(2016, 2, 7),
+            'start': date(2016, 2, 21),
             'end':   date(2046, 6, 30),
             'extract_article_links': extract_article_links_latest
         },
@@ -244,7 +256,8 @@ class XinwenlianboSpider(scrapy.Spider):
                 '//*[@align="center"]/span[@class="title"]/text()',
                 '//div[@class="head_bar"]/h1/text()',
                 '//div[@class="title padd"]/h1/text()',
-                '//div[@class="top_title"]/h1[@class="b-tit"]/text()'
+                '//div[@class="top_title"]/h1[@class="b-tit"]/text()',
+                '//div[@class="cnt_nav"]/h3/text()',
             ]
             for xpath in title_xpaths:
                 xpath_matches = response.xpath(xpath).extract()
@@ -261,7 +274,9 @@ class XinwenlianboSpider(scrapy.Spider):
                 '//td[@class="large"]//*[self::p or self::span]/text()',
                 '//div[@class="text_box"]//*[self::p or self::span]/text()',
                 '//div[@id="content_body"]//*[self::p or self::span]/text()',
-                '//div[@id="top_title"]/p[@class="art-info"]/text()'
+                '//div[@id="top_title"]/p[@class="art-info"]/text()',
+                '//div[@id="about_txt"]//*[self::p or self::span]/text()',
+                '//div[@class="mtab_con"]//span/text()',
             ]
             for xpath in main_text_xpaths:
                 xpath_matches = response.xpath(xpath).extract()
