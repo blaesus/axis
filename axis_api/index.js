@@ -6,7 +6,7 @@ const PostgresPromise = require('pg-promise')({})
 
 const PORT = 21000
 
-const INITIAL_DATA_YAER = 2002
+const INITIAL_DATE = new Date(2002, 0, 1)
 
 const dbOptions = {
   host: 'localhost',
@@ -18,31 +18,72 @@ const dbOptions = {
 
 const db = PostgresPromise(dbOptions)
 
+function formatDate(date) {
+  const yearString = String(date.getFullYear())
+
+  let monthString = String(date.getMonth() + 1)
+  if (date.getMonth() < 9) {
+    monthString = '0' + monthString
+  }
+
+  return `${yearString}-${monthString}-01`
+}
+
 const jsonServer = http.createServer((httpRequest, httpResponse) => {
   const httpQuery = querystring.parse(url.parse(httpRequest.url).query)
 
-  const sqlQuery = `
-    SELECT COUNT(*) FROM reports
-    WHERE main_text LIKE '%${httpQuery.kw}%';
-  `
-  console.log(sqlQuery)
+  const dates = []
+  let date = INITIAL_DATE
+  const now = Date.now()
+  while (date.getTime() < now) {
+    const nextDate = new Date(date.getTime())
+    nextDate.setMonth(date.getMonth() + 1)
+    dates.push({
+      begin: formatDate(date),
+      end: formatDate(nextDate),
+    })
+    date = nextDate
+  }
 
-  db.any(sqlQuery, true)
-    .then(data => {
-      httpResponse.writeHead(200, {
-        'Content-Type': 'application/json',
-      })
-      httpResponse.end(JSON.stringify(data))
-    })
-    .catch(error => {
-      console.error(error)
-      httpResponse.writeHead(500, {
-        'Content-Type': 'application/json',
-      })
-      httpResponse.end(JSON.stringify({
-        error: error,
-      }))
-    })
+  const occurenceCountQueries = dates.map(period => {
+    const sqlQuery = `
+      SELECT COUNT(*) FROM reports
+      WHERE
+        ((main_text LIKE '%${httpQuery.kw}%'
+          OR
+          title LIKE '%${httpQuery.kw}%'
+         )
+         AND
+         pub_date >= '${period.begin}'
+         AND
+         pub_date < '${period.end}'
+        );`
+    return db.any(sqlQuery, true)
+  })
+
+  Promise.all(occurenceCountQueries)
+         .then(counts => {
+           return counts.map((sqlResult, index) => {
+             return Object.assign({}, dates[index], {
+               data: sqlResult[0],
+             })
+           })
+         })
+        .then(results => {
+          httpResponse.writeHead(200, {
+            'Content-Type': 'application/json',
+          })
+          httpResponse.end(JSON.stringify(results))
+        })
+        .catch(error => {
+          console.error(error)
+          httpResponse.writeHead(500, {
+            'Content-Type': 'application/json',
+          })
+          httpResponse.end(JSON.stringify({
+            error: error,
+          }))
+        })
 })
 
 jsonServer.listen(PORT, () => {
