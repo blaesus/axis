@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+import os
+
 # Scrapy settings for axis_scrape project
 #
 # For simplicity, this file contains only settings considered important or
@@ -16,11 +18,11 @@ NEWSPIDER_MODULE = 'axis_scrape.spiders'
 
 DATABASE = {
    'drivername': 'postgres',
-   'host': 'localhost',
-   'port': '5432',
-   'username': 'scrapy',
-   'password': 'scrapy',
-   'database': 'xinwenlianbo'
+   'host': os.environ['AXIS_SQL_HOST'],
+   'port': os.environ['AXIS_SQL_PORT'],
+   'username': os.environ['AXIS_SQL_USERNAME'],
+   'password': os.environ['AXIS_SQL_PASSWORD'],
+   'database': os.environ['AXIS_SQL_DBNAME'],
 }
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 #USER_AGENT = 'axis_scrape (+http://www.yourdomain.com)'
