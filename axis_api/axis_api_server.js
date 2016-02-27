@@ -9,11 +9,11 @@ const PORT = 21000
 const INITIAL_DATE = new Date(2002, 0, 1)
 
 const dbOptions = {
-  host: 'localhost',
-  port: 5432,
-  database: 'xinwenlianbo',
-  user: 'scrapy',
-  password: 'scrapy',
+  host: process.env.AXIS_SQL_HOST,
+  port: process.env.AXIS_SQL_PORT,
+  database: process.env.AXIS_SQL_DBNAME,
+  user: process.env.AXIS_SQL_USERNAME,
+  password: process.env.AXIS_SQL_PASSWORD,
 }
 
 const db = PostgresPromise(dbOptions)
@@ -27,7 +27,7 @@ function getResultPromise(options) {
 
   if (target === 'xinwenlianbo') {
     const sqlQuery = `
-      SELECT COUNT(*) FROM reports
+      SELECT COUNT(*) FROM xinwenlianbo
       WHERE
       ((main_text LIKE '%${keyword}%'
       OR
