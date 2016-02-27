@@ -18,6 +18,32 @@ const dbOptions = {
 
 const db = PostgresPromise(dbOptions)
 
+function getResultPromise(options) {
+  const target = options.target.replace('/', '')
+  const keyword = options.keyword
+  const begin = options.begin
+  const end = options.end
+  console.info(options)
+
+  if (target === 'xinwenlianbo') {
+    const sqlQuery = `
+      SELECT COUNT(*) FROM reports
+      WHERE
+      ((main_text LIKE '%${keyword}%'
+      OR
+      title LIKE '%${keyword}%'
+      )
+      AND
+      pub_date >= '${begin}'
+      AND
+      pub_date < '${end}'
+    );`
+    return db.any(sqlQuery, true)
+  } else {
+    Promise.reject(`Unknwon target ${target}`)
+  }
+}
+
 function formatDate(date) {
   const yearString = String(date.getFullYear())
 
@@ -30,7 +56,8 @@ function formatDate(date) {
 }
 
 const jsonServer = http.createServer((httpRequest, httpResponse) => {
-  const httpQuery = querystring.parse(url.parse(httpRequest.url).query)
+  const httpQuery = url.parse(httpRequest.url)
+  const queryStrings = querystring.parse(httpQuery.query)
 
   const dates = []
   let date = INITIAL_DATE
@@ -45,23 +72,14 @@ const jsonServer = http.createServer((httpRequest, httpResponse) => {
     date = nextDate
   }
 
-  const occurenceCountQueries = dates.map(period => {
-    const sqlQuery = `
-      SELECT COUNT(*) FROM reports
-      WHERE
-        ((main_text LIKE '%${httpQuery.kw}%'
-          OR
-          title LIKE '%${httpQuery.kw}%'
-         )
-         AND
-         pub_date >= '${period.begin}'
-         AND
-         pub_date < '${period.end}'
-        );`
-    return db.any(sqlQuery, true)
-  })
+  const occurrenceCountPromises = dates.map(period => getResultPromise({
+    target: httpQuery.pathname,
+    keyword: queryStrings.kw,
+    begin: period.begin,
+    end: period.end,
+  }))
 
-  Promise.all(occurenceCountQueries)
+  Promise.all(occurrenceCountPromises)
          .then(counts => {
            return counts.map((sqlResult, index) => {
              return Object.assign({}, dates[index], {
