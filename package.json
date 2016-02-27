@@ -1,0 +1,24 @@
+{
+  "name": "axis",
+  "version": "1.0.0",
+  "description": "",
+  "main": "axis_rest/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@gitlab.com/andyshuxin/axis.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://gitlab.com/andyshuxin/axis/issues"
+  },
+  "homepage": "https://gitlab.com/andyshuxin/axis#README",
+  "dependencies": {
+    "pg": "^4.5.1",
+    "pg-promise": "^3.2.3",
+    "q-io": "^1.13.2"
+  }
+}
