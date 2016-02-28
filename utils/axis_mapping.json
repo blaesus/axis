@@ -1,0 +1,54 @@
+{
+  "mappings": {
+    "extract": {
+      "_all": {
+        "analyzer": "ik_max_word",
+        "search_analyzer": "ik_max_word",
+        "term_vector": "no",
+        "store": "false"
+      },
+      "properties": {
+        "main_text": {
+          "type":  "string",
+          "store": "no",
+          "term_vector": "with_positions_offsets",
+          "analyzer": "ik_max_word",
+          "search_analyzer": "ik_max_word",
+          "include_in_all": "true",
+          "boost": 5
+        },
+        "title": {
+          "type":  "string",
+          "store": "no",
+          "term_vector": "with_positions_offsets",
+          "analyzer": "ik_max_word",
+          "search_analyzer": "ik_max_word",
+          "include_in_all": "true",
+          "boost": 10
+        },
+        "url": {
+          "type":  "string",
+          "index": "not_analyzed"
+        },
+        "type": {
+          "type":  "string",
+          "index": "not_analyzed"
+        }
+      }
+    },
+    "raw": {
+      "_all": {
+        "analyzer": "ik_max_word",
+        "search_analyzer": "ik_max_word",
+        "term_vector": "no",
+        "store": "false"
+      },
+      "properties": {
+        "html": {
+          "type":  "string",
+          "index": "not_analyzed"
+        }
+      }
+    }
+  }
+}
