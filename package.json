@@ -17,6 +17,7 @@
   },
   "homepage": "https://gitlab.com/andyshuxin/axis#README",
   "dependencies": {
+    "elasticsearch": "^10.1.3",
     "pg": "^4.5.1",
     "pg-promise": "^3.2.3",
     "q-io": "^1.13.2"
