@@ -52,7 +52,14 @@ const jsonServer = http.createServer((httpRequest, httpResponse) => {
       httpResponse.writeHead(200, {
         'Content-Type': 'application/json',
       })
-      httpResponse.end(JSON.stringify(results))
+      httpResponse.end(JSON.stringify({
+        total_count: results.hits.total,
+        counts: results.aggregations.counts.buckets
+                  .map(node => ({
+                    start_date: node.key,
+                    count: node.doc_count,
+                  })),
+      }))
     })
     .catch(error => {
       console.error(error)
