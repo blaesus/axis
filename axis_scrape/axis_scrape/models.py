@@ -22,7 +22,7 @@ def create_deals_table(engine):
 
 class Reports(DeclarativeBase):
     """Sqlalchemy reports model"""
-    __tablename__ = "reports"
+    __tablename__ = "xinwenlianbo"
 
     id = Column(Integer, primary_key=True)
     url = Column(String, nullable=True)
