@@ -185,7 +185,7 @@ def clean_str(s):
 def make_minimal_record(response, response_type='unexpected'):
     return {
         'url': response.url,
-        'html': response.body,
+        'html': response.body_as_unicode(),
         'order': response.meta['order'],
         'type': response_type,
         'pub_date': response.meta['pub_date'],
@@ -289,7 +289,7 @@ class XinwenlianboSpider(scrapy.Spider):
             else:
                 yield {
                     'url': response.url,
-                    'html': response.body,
+                    'html': response.body_as_unicode(),
                     'title': title,
                     'order': response.meta['order'],
                     'type': 'report',
